@@ -2,6 +2,8 @@ import express from "express";
 import bodyParser from "body-parser";
 import { studentRouter } from "./routes/studentRoutes.js";
 import { teacherRouter } from "./routes/teacherRoutes.js";
+import swaggerUi from "swagger-ui-express";
+import swaggerJsdoc from "swagger-jsdoc";
 
 const app = express();
 app.use(bodyParser.json());
@@ -12,6 +14,26 @@ app.use("/api/teacher", teacherRouter);
 app.get("/", (req, res) =>
     res.json({ status: "Learning Platform API is running" })
 );
+// Swagger options
+const swaggerOptions = {
+    definition: {
+        openapi: "3.0.0",
+        info: {
+            title: "Learning Platform API",
+            version: "1.0.0",
+            description: "Документация API для онлайн-платформы обучения",
+        },
+        servers: [
+            {
+                url: process.env.RAILWAY_URL || "http://localhost:3000",
+            },
+        ],
+    },
+    apis: ["./src/routes/*.js"], // путь к файлам с аннотациями
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
