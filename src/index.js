@@ -5,16 +5,13 @@ import { teacherRouter } from "./routes/teacherRoutes.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerJsdoc from "swagger-jsdoc";
 
-const app = express();
-app.use(bodyParser.json());
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
-app.use("/api/student", studentRouter);
-app.use("/api/teacher", teacherRouter);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-app.get("/", (req, res) =>
-    res.json({ status: "Learning Platform API is running" })
-);
-// Swagger options
 const swaggerOptions = {
     definition: {
         openapi: "3.0.0",
@@ -24,13 +21,21 @@ const swaggerOptions = {
             description: "Документация API для онлайн-платформы обучения",
         },
         servers: [
-            {
-                url: process.env.RAILWAY_URL || "http://localhost:3000",
-            },
+            { url: "https://system-analyze-module1-production.up.railway.app" },
         ],
     },
-    apis: ["./src/routes/*.js"], // путь к файлам с аннотациями
+    apis: [path.join(__dirname, "routes", "*.js")],
 };
+
+const app = express();
+app.use(bodyParser.json());
+
+app.use("/api/student", studentRouter);
+app.use("/api/teacher", teacherRouter);
+
+app.get("/", (req, res) =>
+    res.json({ status: "Learning Platform API is running" })
+);
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
